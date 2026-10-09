@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenalan Sama Idris 🤝</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:18px;
+background:radial-gradient(circle at 15% 15%,#6553a6 0,transparent 30%),radial-gradient(circle at 85% 80%,#2d8c8c 0,transparent 30%),linear-gradient(135deg,#11131f,#25203b 55%,#111923);position:relative;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(#ffffff18 1px,transparent 1px);background-size:24px 24px}
+.app{width:100%;max-width:560px;background:#171925eF;border:1px solid #ffffff20;border-radius:30px;padding:24px;box-shadow:0 22px 70px #0009;backdrop-filter:blur(12px)}
+h1{font-size:28px;margin:0 0 8px;text-align:center}.intro{text-align:center;line-height:1.6;color:#ddd}.line{border-top:1px dashed #777;margin:18px 0}
+input{width:100%;padding:15px;border:1px solid #ffffff18;border-radius:14px;background:#2b2d3c;color:white;font-size:16px;outline:none}
+input:focus{border-color:#aaa}
+button{border:0;border-radius:15px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer;width:100%;margin-top:12px;background:#f1f1f1;color:#20202b}
+button:hover{transform:translateY(-1px)}
+.qtop{display:flex;justify-content:space-between;color:#bbb;font-size:14px}.question{font-size:23px;font-weight:800;text-align:center;margin:20px 0}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.choice{background:#292b39;color:white;border:2px solid transparent;padding:10px;min-height:190px;overflow:hidden}
+.choice img{width:100%;height:125px;object-fit:cover;border-radius:12px;display:block;margin-bottom:10px}
+.choice .emoji{height:125px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3b3d50,#222433);font-size:55px;margin-bottom:10px}
+.choice.correct{border-color:#52d273;background:#21492d}.choice.wrong{border-color:#ef6262;background:#54272b}
+.choice:disabled{cursor:default;opacity:1}
+.score{text-align:center;font-size:52px;font-weight:900;margin:15px 0}.result{text-align:center;line-height:1.6}.small{color:#bbb;font-size:14px}
+.hidden{display:none!important}
+@media(max-width:380px){.app{padding:18px}.choices{grid-template-columns:1fr}.question{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="start">
+<h1>Kenalan sama Idris yukk 🤝</h1>
+<div class="intro">anak nakal introvert lagi 😝<div class="line"></div><b>Kenalan dulu aja</b><br>klk gak suka boleh pergi 🗿</div>
+<div style="margin-top:22px"><label for="name">Siapa namamu? 👀</label><input id="name" maxlength="30" placeholder="Tulis nama kamu..."><button id="startBtn">MULAI KUIS ➜</button></div>
+</section>
+
+<section id="quiz" class="hidden">
+<div class="qtop"><span id="counter"></span><span id="player"></span></div>
+<div class="question" id="question"></div>
+<div class="choices" id="choices"></div>
+</section>
+
+<section id="result" class="hidden">
+<h1>🏆 HASIL KUIS</h1>
+<div class="score" id="score"></div>
+<div class="result" id="message"></div>
+<button id="again">🔄 COBA LAGI</button>
+<button id="share">📤 BAGIKAN HASIL</button>
+</section>
+</div>
+
+<script>
+const questions=[
+ {q:"🗿 Idris biasanya introvert kalau ketemu siapa?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM2YjNmYTAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyZDdmOGYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn6SqPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+T1JBTkcgR0lMQTwvdGV4dD48L3N2Zz4=","Orang gila",1],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzYjU4N2EiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyNDMzNGYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5itPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+T1JBTkcgV0FSQVM8L3RleHQ+PC9zdmc+","Orang waras",0]]},
+ {q:"🍽️ Idris paling suka makan apa?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiNjODVhMzYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmMGE0NGIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn42cPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+TUFLQU5BTk1VPC90ZXh0Pjwvc3ZnPg==","Makananmu",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM4YzRiMmIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkOTliNGEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn42XPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+TUFLQU5BTiBPUkFORzwvdGV4dD48L3N2Zz4=","Makanan orang",1]]},
+ {q:"😈 Idris nakal karena siapa?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzODViOTEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1Yzg3YjgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5Go4oCN8J+PqzwvdGV4dD4KPHRleHQgeD0iMzUwIiB5PSIzNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0id2hpdGUiPlVTVEFEIElTTUFJTDwvdGV4dD48L3N2Zz4=","Ustad Ismail",1],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM1YTRhMzgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM5YTc3NTUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5e/PC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+UEVSR0FVTEFOPC90ZXh0Pjwvc3ZnPg==","Pergaulan",0]]},
+ {q:"💼 Pekerjaan apa yang Idris suka?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM4YzZiMTYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkNGE3MmMiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5GRPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+SkFESSBCT1NTPC90ZXh0Pjwvc3ZnPg==","Jadi BOSS",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM5YjRiNzAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkNjdjOWUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5KG4oCN4pmA77iPPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+VFVLQU5HIFVSVVQ8L3RleHQ+PC9zdmc+","Tukang urut wanita",1]]},
+ {q:"💭 Hayalan apa yang Idris paling inginkan?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM3MzUwOGMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNjMTg0YjUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5Gw4oCN4pmA77iPPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+SVNUUkkgRU1QQVQ8L3RleHQ+PC9zdmc+","Punya istri empat",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzODVmOGMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM1M2EzYWQiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn6egPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+UFVOWUEgU0lTVEVNPC90ZXh0Pjwvc3ZnPg==","Punya sistem",1]]},
+ {q:"🎬 Film apa yang paling disukai Idris?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzMTVhOTEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3YjVhYTYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn4ew8J+HtzwvdGV4dD4KPHRleHQgeD0iMzUwIiB5PSIzNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIzOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0id2hpdGUiPkRSQUtPUjwvdGV4dD48L3N2Zz4=","Drakor",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM1ODQ2M2IiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiNDc3NTQiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5e/PC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+U1VHSU9OTzwvdGV4dD48L3N2Zz4=","Sugiono",1]]},
+ {q:"🕌 Suasana mana yang paling disukai Idris?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMzNDNjNTQiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2Zjc3OGMiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5WLPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+TUFLS0FIPC90ZXh0Pjwvc3ZnPg==","Makkah",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM2ZDQxNmYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiMjZkOGMiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn462PC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+TUFIQUxVTCBRSVlBTTwvdGV4dD48L3N2Zz4=","Mahalul Qiyam",1]]},
+ {q:"🥤 Minuman apa yang disukai Idris?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM4ZTNjMjUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkODdiM2IiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5SlPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+UEFOQVM8L3RleHQ+PC9zdmc+","Panas",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMyNzY3OGEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3MmM1ZGYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn6eKPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+RElOR0lOPC90ZXh0Pjwvc3ZnPg==","Dingin",1]]},
+ {q:"📚 Idris paling suka belajar ditemenin siapa?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM4YjNiNTkiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkNDZkOTEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7inaTvuI88L3RleHQ+Cjx0ZXh0IHg9IjM1MCIgeT0iMzY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IndoaXRlIj5BWUFOSzwvdGV4dD48L3N2Zz4=","Ayank",0],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM0NDNkNzAiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM4MjVjOWQiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5iIPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+VEVNQU4gTEFLTkFUPC90ZXh0Pjwvc3ZnPg==","Teman laknat",1]]},
+ {q:"🎮 Game apa yang paling Idris suka?",a:[["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiM4ZDNjMzUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkMDZiM2YiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7impTvuI88L3RleHQ+Cjx0ZXh0IHg9IjM1MCIgeT0iMzY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IndoaXRlIj5NT0JJTEUgTEVHRU5EUzwvdGV4dD48L3N2Zz4=","Mobile Legends",1],["data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MDAiIGhlaWdodD0iNDUwIiB2aWV3Qm94PSIwIDAgNzAwIDQ1MCI+CjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHgyPSIxIiB5MT0iMCIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiNhMTRiMjIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNlMzlhM2IiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NTAiIHJ4PSIzMCIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjM1MCIgY3k9IjE4NSIgcj0iMTEwIiBmaWxsPSIjZmZmZmZmMjIiLz4KPHRleHQgeD0iMzUwIiB5PSIyMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIwIj7wn5SlPC90ZXh0Pgo8dGV4dCB4PSIzNTAiIHk9IjM2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSJ3aGl0ZSI+RlJFRSBGSVJFPC90ZXh0Pjwvc3ZnPg==","Free Fire",0]]},
+];
+let name="",index=0,score=0;
+
+const $=id=>document.getElementById(id);
+$("startBtn").onclick=()=>{
+ name=$("name").value.trim()||"Anonim";
+ index=0;score=0;
+ $("start").classList.add("hidden");$("result").classList.add("hidden");$("quiz").classList.remove("hidden");
+ render();
+};
+function render(){
+ const item=questions[index];
+ $("counter").textContent=`Soal ${index+1}/${questions.length}`;
+ $("player").textContent=name;
+ $("question").textContent=item.q;
+ $("choices").innerHTML="";
+ item.a.forEach((x)=>{
+  const b=document.createElement("button");b.className="choice";
+  b.innerHTML=`<img src="${x[0]}" alt="${x[1]}"><b>${x[1]}</b>`;
+  b.onclick=()=>answer(b,x[2]);
+  $("choices").appendChild(b);
+ });
+}
+function answer(btn,correct){
+ [...$("choices").children].forEach(b=>b.disabled=true);
+ if(correct){score++;btn.classList.add("correct")}else btn.classList.add("wrong");
+ setTimeout(()=>{
+  index++;
+  if(index<questions.length)render();else finish();
+ },500);
+}
+function finish(){
+ $("quiz").classList.add("hidden");$("result").classList.remove("hidden");
+ $("score").textContent=`${score}/${questions.length}`;
+ let msg="";
+ if(score>=9)msg=`🔥 <b>GILA, ${name} KENAL BANGET!</b><br>Kayaknya kamu terlalu sering memperhatikan Idris 🗿😭`;
+ else if(score>=7)msg=`😎 <b>LUMAYAN KENAL!</b><br>Masih ada beberapa rahasia Idris yang belum kamu bongkar.`;
+ else if(score>=4)msg=`😭 <b>KENAL SIH...</b><br>Tapi kayaknya cuma kenal nama.`;
+ else msg=`🗿 <b>KAMU YAKIN KITA PERNAH KENALAN?</b><br>Silakan kenalan ulang dari awal 😂`;
+ msg+=`<br><br>🤝 Terima kasih sudah berkenalan sama Idris!<br>Kalau nilaimu kecil, tenang... <b>Idris juga belum tentu kenal dirinya sendiri.</b> 😂<br><br>Risiko pertemanan ditanggung masing-masing 🗿`;
+ $("message").innerHTML=msg;
+}
+$("again").onclick=()=>{
+ $("result").classList.add("hidden");$("start").classList.remove("hidden");$("name").value=name;
+};
+$("share").onclick=async()=>{
+ const text=`Aku baru selesai kuis "Kenalan Sama Idris"! 🤝\\nNama: ${name}\\nNilai: ${score}/${questions.length} 🗿`;
+ if(navigator.share){try{await navigator.share({title:"Kenalan Sama Idris",text})}catch(e){}}
+ else{alert(text+"\\n\\nSalin teks ini dan kirim ke temanmu!")}
+};
+</script>
+</body>
+</html>
